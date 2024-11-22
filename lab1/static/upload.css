@@ -1,0 +1,46 @@
+h1{
+    font-size: xx-large;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    margin: 5% 0 10% 0;
+}
+
+.input-up{
+    border-radius: 20px;
+    height: 50px;
+    width: 75%;
+    margin-left: 20px;
+    padding: 5px 0 5px 10px;
+    font-size: large;
+    display: flex;
+    position: relative;
+}
+
+label{
+    font-size: x-large;
+    height: 5%;
+    margin: 15px 50px;
+    display: flex;
+    position: relative;
+}
+
+.btn-submit{
+    background-color: black;
+    color: white;
+    justify-content: center;
+    font-size: large;
+    width: 150px;
+    height: auto;
+    display: flex;
+    position: relative;
+    margin: 10px 50px;
+    border-radius: 30px;
+    border: 2px solid black;
+    padding: 10px 0;
+}
+
+.btn-submit:hover {
+    cursor: pointer; /* Изменяет курсор на указатель */
+    background-color: darkgrey; /* Изменяет цвет фона при наведении */
+}

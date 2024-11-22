@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Logical search</title>
+    <link rel="stylesheet" href="/static/main.css?v=1.1">
+    <link rel="stylesheet" href="/static/search.css?v=1.1">
+
+    <link rel="stylesheet" href="/static/upload.css?v=1.1">
+</head>
+<body>
+    <header>
+        <nav class="menu">
+            <a href="/" class="header-button">На главную</a>
+            <a href="/upload" class="header-button">Добавление текстов</a>
+            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/metrics" class="header-button">Метрики</a>
+        </nav>
+    </header>
+     <button class="info-button" id="showTextButton" type="button">?</button>
+            <div id="text" class="my-text" style="display: none;">Логические связки: И/ИЛИ<br>
+                Отрицание: НЕ<br>
+                Искомые слова заключаются в "двойные кавычки"<br>
+                Для добавления приоритета поиска используются (скобки)<br>
+                Для поиска одного слова (с отрицанием или без) или 2 слов с 1 связкой (скобки) не нужны<br>
+                Примеры:<br>
+                "Слово"<br>
+                "Слово" ИЛИ "Слово"<br>
+                "Слово" ИЛИ ("Слово" И "Слово")<br>
+                НЕ "Слово"
+            </div>
+        <h1>Добавление текста</h1>
+
+    <div>
+
+
+        <form class="form-control" method="post">
+            <label for="input-field">Введите формулу для логического поиска</label>
+                <div class="input-container">
+                    <input type="text" name="query" id="input-field" placeholder="Введите запрос" value="{{query}}" class="input-up"><br>
+                    <div id="extra-placeholder" class="extra-placeholder"></div>
+                </div>
+            <button type="submit" class="btn-submit">Поиск</button>
+        </form>
+        {% if flag %}
+        <p>{{ flag }}</p>
+        {% endif %}
+        {% if result %}
+        {% for item in result %}
+            <div class="row">
+                <div class="col-md-6 item">
+                    <div class="item-in">
+                        <div class="separator"></div>
+                        <a class='link' href="{{ item[1] }}">{{item[2]}}</a>
+                        <p class="clickable">{{ item[0] }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    <script>
+        // Получаем элементы кнопки и текста
+        const button = document.getElementById('showTextButton'); // Исправлено здесь
+        const text = document.getElementById('text');
+
+        // Добавляем обработчик события на кнопку
+        button.addEventListener('click', function () {
+            if (text.style.display === 'none' || text.style.display === '') {
+                text.style.display = 'block'; // Показываем текст
+            } else {
+                text.style.display = 'none'; // Скрываем текст
+            }
+        });
+
+           /* const inputField = document.getElementById('input-field');
+            const extraPlaceholder = document.getElementById('extra-placeholder');
+
+            inputField.addEventListener('input', function() {
+            const value = this.value;
+
+            if (value) {
+            // Проверка наличия слова "НЕ"
+            const notIndex = value.indexOf('НЕ');
+            if (notIndex !== -1) {
+            const afterNot = value.slice(notIndex + 2); // Всё, что после "НЕ"
+
+            // Проверка условий: пробел и затем кавычка
+            if (afterNot.length === 0 || afterNot[0] !== ' ' || (afterNot.length > 1 && afterNot[1] !== '"')) {
+            // Если условия не выполняются, оставляем только "НЕ"
+            this.value = value.slice(0, notIndex + 2); // Оставляем только "НЕ"
+            extraPlaceholder.style.display = 'block';
+            extraPlaceholder.textContent = ' "';
+            return; // Выходим, чтобы не продолжать
+        } else {
+            // Если всё корректно, скрываем подсказку
+            extraPlaceholder.style.display = 'none';
+        }
+        } else {
+            extraPlaceholder.style.display = 'none'; // Скрываем подсказку, если "НЕ" нет
+        }
+
+           /* const openParenthesisIndex = value.indexOf('(');
+            if (openParenthesisIndex !== -1) {
+            const afterParenthesis = value.slice(openParenthesisIndex); // Всё, что после "("
+
+            // Проверка, что после "(" должен быть пробел или сразу кавычка
+            if (afterParenthesis.length === 0 || afterParenthesis[0] !== ' ' || (afterParenthesis.length > 1 && afterParenthesis[1] !== '"')){
+            //(afterParenthesis[0] !== ' ' && afterParenthesis[0] !== '"') || (afterParenthesis[0] === ' ' && afterParenthesis[1] !== '"')) {
+            // Если условия не выполняются, оставляем только "("
+            this.value = value.slice(0, openParenthesisIndex + 1); // Оставляем только "("
+            extraPlaceholder.style.display = 'block';
+            extraPlaceholder.textContent = ' "';
+            return; // Выходим, чтобы не продолжать
+        } else {
+            // Если всё корректно, скрываем подсказку
+            extraPlaceholder.style.display = 'none';
+        }
+        } else {
+            extraPlaceholder.style.display = 'none'; // Скрываем подсказку, если "НЕ" или "(" нет
+        }
+
+            const quoteCount = (value.match(/"/g) || []).length;
+            const parenthesisCount = (value.match(/\(/g) || []).length;
+
+            // Проверка нечетного количества кавычек
+            if (quoteCount % 2 !== 0) {
+            extraPlaceholder.style.display = 'block';
+            extraPlaceholder.textContent = ' "';
+        }
+            // Проверка нечетного количества скобок
+            if (parenthesisCount % 2 !== 0) {
+            extraPlaceholder.style.display = 'block';
+            extraPlaceholder.textContent = ' )';
+        } else{
+            extraPlaceholder.style.display = 'none';
+            extraPlaceholder.textContent = '';
+
+        }
+            // extraPlaceholder.style.display = 'block'; // Показываем дополнительную подсказку
+            //extraPlaceholder.textContent = value; // Подсказка отображает введенное значение
+            // Позиционирование подсказки
+            const valueWidth = getTextWidth(value, window.getComputedStyle(this).font);
+            extraPlaceholder.style.left = `${valueWidth + 10}px`; // Смещение на 10 пикселей
+        } else {
+            extraPlaceholder.style.display = 'none'; // Скрываем, если поле пустое
+        }
+        });
+
+            // Функция для расчета ширины текста
+            function getTextWidth(text, font) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = font;
+            return context.measureText(text).width;
+        }*/
+    </script>
+
+</body>
+</html>

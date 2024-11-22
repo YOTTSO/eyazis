@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="/static/main.css?v=1.1">
+    <link rel="stylesheet" href="/static/search.css?v=1.1">
+
+    <link rel="stylesheet" href="/static/upload.css?v=1.1">
+</head>
+<body>
+    <header>
+        <nav class="menu">
+            <a href="/" class="header-button">На главную</a>
+            <a href="/upload" class="header-button">Добавление текстов</a>
+            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/metrics" class="header-button">Метрики</a>
+        </nav>
+    </header>
+<div class="links">
+{% for link in links %}
+<a class="link" href="{{link[0]}}" target="_blank" rel="noopener noreferrer">{{link[1]}}</a>
+{% endfor %}
+</div>
+</body>
+</html>

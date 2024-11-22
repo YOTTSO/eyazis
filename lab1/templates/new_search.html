@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placeholder при вводе</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .input-container {
+            position: relative;
+            margin-top: 20px;
+        }
+        .extra-placeholder {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: grey;
+            display: none; /* Скрыто по умолчанию */
+            white-space: nowrap; /* Не переносить текст */
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Поле ввода с подсказкой</h1>
+    <div class="input-container">
+        <input type="text" id="input-field" placeholder="Введите текст...">
+        <div id="extra-placeholder" class="extra-placeholder"></div>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('input-field');
+        const extraPlaceholder = document.getElementById('extra-placeholder');
+
+        inputField.addEventListener('input', function() {
+            const value = this.value;
+
+            if (value) {
+                            // Проверка наличия слова "НЕ"
+                const notIndex = value.indexOf('НЕ');
+                if (notIndex !== -1) {
+                    const afterNot = value.slice(notIndex + 2); // Всё, что после "НЕ"
+
+                // Проверка условий: пробел и затем кавычка
+                    if (afterNot.length === 0 || afterNot[0] !== ' ' || (afterNot.length > 1 && afterNot[1] !== '"')) {
+                    // Если условия не выполняются, оставляем только "НЕ"
+                        this.value = value.slice(0, notIndex + 2); // Оставляем только "НЕ"
+                        extraPlaceholder.style.display = 'block';
+                        extraPlaceholder.textContent = ' "';
+                        return; // Выходим, чтобы не продолжать
+                    } else {
+                    // Если всё корректно, скрываем подсказку
+                        extraPlaceholder.style.display = 'none';
+                    }
+                } else {
+                    extraPlaceholder.style.display = 'none'; // Скрываем подсказку, если "НЕ" нет
+                }
+
+                const openParenthesisIndex = value.indexOf('(');
+                if (openParenthesisIndex !== -1) {
+                    const afterParenthesis = value.slice(openParenthesisIndex); // Всё, что после "("
+
+                // Проверка, что после "(" должен быть пробел или сразу кавычка
+                    if (afterParenthesis.length === 0 || afterParenthesis[0] !== ' ' || (afterParenthesis.length > 1 && afterParenthesis[1] !== '"')){
+                        //(afterParenthesis[0] !== ' ' && afterParenthesis[0] !== '"') || (afterParenthesis[0] === ' ' && afterParenthesis[1] !== '"')) {
+                    // Если условия не выполняются, оставляем только "("
+                        this.value = value.slice(0, openParenthesisIndex + 1); // Оставляем только "("
+                        extraPlaceholder.style.display = 'block';
+                        extraPlaceholder.textContent = ' "';
+                        return; // Выходим, чтобы не продолжать
+                    } else {
+                    // Если всё корректно, скрываем подсказку
+                        extraPlaceholder.style.display = 'none';
+                    }
+                } else {
+                    extraPlaceholder.style.display = 'none'; // Скрываем подсказку, если "НЕ" или "(" нет
+                }
+
+                const quoteCount = (value.match(/"/g) || []).length;
+                const parenthesisCount = (value.match(/\(/g) || []).length;
+
+            // Проверка нечетного количества кавычек
+                if (quoteCount % 2 !== 0) {
+                    extraPlaceholder.style.display = 'block';
+                    extraPlaceholder.textContent = ' "';
+                }
+            // Проверка нечетного количества скобок
+                if (parenthesisCount % 2 !== 0) {
+                    extraPlaceholder.style.display = 'block';
+                    extraPlaceholder.textContent = ' )';
+                } else{
+                    extraPlaceholder.style.display = 'none';
+                    extraPlaceholder.textContent = '';
+
+                }
+               // extraPlaceholder.style.display = 'block'; // Показываем дополнительную подсказку
+                //extraPlaceholder.textContent = value; // Подсказка отображает введенное значение
+                // Позиционирование подсказки
+                const valueWidth = getTextWidth(value, window.getComputedStyle(this).font);
+                extraPlaceholder.style.left = `${valueWidth + 10}px`; // Смещение на 10 пикселей
+            } else {
+                extraPlaceholder.style.display = 'none'; // Скрываем, если поле пустое
+            }
+        });
+
+        // Функция для расчета ширины текста
+        function getTextWidth(text, font) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = font;
+            return context.measureText(text).width;
+        }
+    </script>
+
+</body>
+</html>

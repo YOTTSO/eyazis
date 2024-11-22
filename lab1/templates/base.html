@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/main.css?v=1.1">
+    <link rel="stylesheet" href="/static/upload.css?v=1.1">
+</head>
+<body>
+    <header>
+        <nav class="menu">
+            <a href="/" class="header-button">На главную</a>
+            <a href="/upload" class="header-button">Добавление текстов</a>
+            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/user/admin" class="header-button">Метрики</a>
+        </nav>
+    </header>
+
+        {% block content %}{% endblock %}
+
+
+</body>
+</html>

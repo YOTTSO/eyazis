@@ -1,0 +1,45 @@
+body{
+    display: flex;
+    flex-direction: column;
+}
+
+.info-button{
+    border: 3px white solid;
+    height: 30px;
+    width: 30px;
+    border-radius: 30px;
+    text-align: center;
+    align-self: flex-end;
+    margin: 20px 20px 0 0;
+}
+
+.my-text{
+    border: 3px white solid;
+    height: auto;
+    width: 300px;
+    border-radius: 30px;
+    text-align: center;
+    align-self: flex-end;
+    margin: 20px 20px 0 0;
+    background-color: white;
+    padding: 20px;
+}
+
+.input-container {
+            position: relative;
+            margin-top: 20px;
+        }
+        .extra-placeholder {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: grey;
+            display: none; /* Скрыто по умолчанию */
+            white-space: nowrap; /* Не переносить текст */
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }

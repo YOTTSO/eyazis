@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <link rel="stylesheet" href="/static/main.css?v=1.1">
+    <link rel="stylesheet" href="/static/search.css?v=1.1">
+
+    <link rel="stylesheet" href="/static/upload.css?v=1.1">
+</head>
+<body>
+    <header>
+        <nav class="menu">
+            <a href="/" class="header-button">На главную</a>
+            <a href="/upload" class="header-button">Добавление текстов</a>
+            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/metrics" class="header-button">Метрики</a>
+        </nav>
+    </header>
+    <ul>
+  <li>Логическая модель трактует термины в запросе как булевы переменные.</li>
+  <li>При наличии термина в документе соответствующая переменная принимает значение «true» (истина).</li>
+  <li>Присваивание терминам весовых коэффициентов не допускается.</li>
+  <li>Запросы формулируются как произвольные булевы выражения, связывающие термины с помощью стандартных логических операций: ИЛИ, И или НЕ.</li>
+  <li>Мерой соответствия запроса документу служит значение статуса выборки (RSV, retrieval status value).</li>
+  <li>В булевой модели статус выборки равен либо 1, если для данного документа вычисление выражения запроса дает значение «истина», либо 0 в противном случае.</li>
+  <li>Все документы с RSV = 1 считаются релевантными запросу.</li>
+</ul>
+
+<div>{% for item in result %}
+    {{item}}<br>
+    {% endfor %}
+</div>
+</body>
+</html>
