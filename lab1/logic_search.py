@@ -1,15 +1,18 @@
 import os
 import re
 from itertools import groupby
-
-
-from analyzer import analyse_text
+from lab1.analyzer import analyse_text
 import nltk
 from urllib.parse import quote
 
+import math
+from collections import defaultdict
+from urllib.parse import quote
+from itertools import groupby
+from lab1.analyzer import analyse_text
 
-path = "/files"  # for Windows
-path = os.getcwd() + path
+words_weight = {}
+path = '/home/yottso/Projects/EYAZIIS-2/files'
 nltk.download('punkt_tab')
 queries = {}
 
@@ -112,37 +115,53 @@ def find_word(word, words_list):
     return str(result)
 
 
-def find_in_dir(text):
-    queries[text]=[]
-    print(queries)
+def calculate_tf_idf(docs, term):
+    """
+    Рассчитывает TF-IDF для заданного термина во всех документах.
+    """
+    tf = {doc: words_weight[doc].get(term, 0) for doc in docs}  # Частота термина в документе
+    idf = math.log10(len(docs) / (1 + sum(1 for doc in docs if term in words_weight[doc])))  # IDF
+    tf_idf = {doc: tf[doc] * idf for doc in docs}
+    return tf_idf
+
+def probabilistic_search(query):
+    """
+    Реализует вероятностный поиск на основе TF-IDF.
+    """
+    query_terms = query.split()  # Разделяем запрос на отдельные слова
+    relevant_docs = defaultdict(float)
+    docs = os.listdir(path)
+
+    # Рассчитываем TF-IDF для каждого слова в запросе
+    for term in query_terms:
+        tf_idf_scores = calculate_tf_idf(docs, term)
+        for doc, score in tf_idf_scores.items():
+            relevant_docs[doc] += score  # Суммируем веса для документов
+
+    # Сортируем документы по релевантности
+    sorted_docs = sorted(relevant_docs.items(), key=lambda x: x[1], reverse=True)
+    return sorted_docs
+
+def find_in_dir(query):
+    """
+    Использует вероятностный подход для поиска по файлам.
+    """
     os.chdir(path)
-    global num
-    num = 0
-    result, res = [], {}
-    for root, dirs, files in os.walk(path, topdown=False):
-        for name in files:
-            words_list = []
-            pattern = re.compile('\"(.*?)\"', re.S)
-            num += 1
+    results = probabilistic_search(query)
+    formatted_results = []
 
-            file_search_str = re.sub(pattern, lambda m: find_word(m.group()[1:-1], words_list=words_list), text)
-            RSV = nested_bool_eval(file_search_str)
+    for doc, relevance in results:
+        with open(os.path.join(path, doc), 'r', encoding='utf-8') as file:
+            link = file.readline()
+            title = file.readline()
+            formatted_results.append({
+                "doc": doc,
+                "relevance": relevance,
+                "link": link.strip(),
+                "title": title.strip()
+            })
 
-            new_words_list = [el for el, _ in groupby(words_list)]
-            if RSV:
-                with open(os.path.join(root, name), 'r') as file:
-                    link = file.readline()
-                    nm = file.readline()
+    return formatted_results
 
-                result.append([
-                    
-                    "Файл: " + os.path.abspath(os.path.join(root, name)) + "\nСписок присутствующих слов: " + str(
-                        new_words_list), link])
 
-                res["Список присутствующих слов: " + str(
-                        new_words_list)] =  [link, nm]
-                queries[text].append(name)
-
-    result = {quote(key): [value[0], quote(value[1])] for key, value in res.items()}
-    return result
 

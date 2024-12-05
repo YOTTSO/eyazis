@@ -8,7 +8,7 @@ import os
 import math
 
 
-file_path = os.getcwd() + '/files'
+file_path = '/home/yottso/Projects/EYAZIIS-2/files'
 nltk.download('stopwords')
 nltk.download('punkt')
 stop_words = set(stopwords.words('russian'))
@@ -29,7 +29,7 @@ def parse_site(url):
 
         filename = f"file{len(os.listdir(file_path))+1}.txt"
         # Сохраняем текст в файл
-        with open(f"files/{filename}", "w", encoding="utf-8") as file:
+        with open(f"../files/{filename}", "w", encoding="utf-8") as file:
             file.write(url)
             file.write("\n"+page_text)
 
@@ -42,21 +42,13 @@ def parse_site(url):
 
 
 def analyse(text, filename):
-    text_words = re.findall(r'\b\w+\b', text)
-    print(text_words)
+    text_words = re.findall(r'\b\w+\b', text.lower())
     filtered_words = [word for word in text_words if word not in stop_words]
-    print(filtered_words)
     word_count = Counter(filtered_words)
-    global words
-    for word, count in word_count.items():
-        if word not in words:
-            words[word] = [[filename, count]]
-        else:
-            words[word].append([filename, count])
+
     global words_weight
     words_weight[filename] = {}
     file_count = sum(1 for entry in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, entry)))
 
     for word, count in word_count.items():
-        words_weight[filename][word] = word_count[word]*math.log10(file_count/len(words[word]))
-    
+        words_weight[filename][word] = count * math.log10(file_count / len([1 for file in words_weight if word in words_weight[file]]))

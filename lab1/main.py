@@ -8,15 +8,15 @@ from fastapi.staticfiles import StaticFiles
 
 from urllib.parse import  unquote
 import json
-from logic_search import find_in_dir,  queries
+from lab1.logic_search import find_in_dir,  queries
 import os
 from pathlib import Path
 
-from parser import parse_site
+from lab1.parser import parse_site
 
 BASE_DIR = Path(__file__).resolve().parent
 
-templates = Jinja2Templates(directory=str(Path(BASE_DIR, 'templates')))
+templates = Jinja2Templates(directory=str(Path(BASE_DIR, '../templates')))
 
 app = FastAPI()
 file_path = os.getcwd() + '/files'
@@ -180,3 +180,34 @@ def get_metrics():
 
     else:
         return ["NONE"]
+
+@app.get("/probabilistic_search", response_class=HTMLResponse)
+async def logical_search(request: Request, flag: Optional[str] = None, query: Optional[str] = None, result: str = Cookie(None)):
+    if result:
+        data = json.loads(result)
+        response = templates.TemplateResponse(name="search.html",
+                                              request=request,
+                                              context={"result": data,
+                                                       "flag": flag,
+                                                       "query": query})
+        response.delete_cookie(key="result")
+        return response
+    return templates.TemplateResponse(name="search.html",
+                                      request=request,
+                                      context={"result": None, "flag": flag})
+
+@app.post("/probabilistic_search", response_class=RedirectResponse, status_code=303)
+async def logical_search(query: str = Form(...)):
+    try:
+        if query.strip():
+            results = find_in_dir(query)
+            flag = 'Результат запроса:'
+            response = RedirectResponse(url=f"/probabilistic_search?flag={flag}&query={query}", status_code=303)
+            response.set_cookie(key="result", value=json.dumps(results))
+            return response
+        else:
+            flag = 'Пожалуйста, введите запрос для поиска.'
+            return RedirectResponse(url=f"/probabilistic_search?flag={flag}", status_code=303)
+    except Exception:
+        flag = 'Некорректный ввод'
+        return RedirectResponse(url=f"/probabilistic_search?flag={flag}&query={query}", status_code=303)
