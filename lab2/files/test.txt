@@ -1,0 +1,6 @@
+Файл: /home/yottso/Projects/EYAZIIS-2/lab2/files/erika.pdf
+Метод частотных слов: german
+Метод коротких слов: german
+Нейросетевой метод: de
+Ссылка на документ: file:///home/yottso/Projects/EYAZIIS-2/lab2/files/erika.pdf
+

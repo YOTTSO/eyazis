@@ -1,14 +1,9 @@
 import os
-import re
-from itertools import groupby
-from lab1.analyzer import analyse_text
 import nltk
-from urllib.parse import quote
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 import math
 from collections import defaultdict
-from urllib.parse import quote
-from itertools import groupby
 from lab1.analyzer import analyse_text
 
 words_weight = {}
@@ -123,45 +118,4 @@ def calculate_tf_idf(docs, term):
     idf = math.log10(len(docs) / (1 + sum(1 for doc in docs if term in words_weight[doc])))  # IDF
     tf_idf = {doc: tf[doc] * idf for doc in docs}
     return tf_idf
-
-def probabilistic_search(query):
-    """
-    Реализует вероятностный поиск на основе TF-IDF.
-    """
-    query_terms = query.split()  # Разделяем запрос на отдельные слова
-    relevant_docs = defaultdict(float)
-    docs = os.listdir(path)
-
-    # Рассчитываем TF-IDF для каждого слова в запросе
-    for term in query_terms:
-        tf_idf_scores = calculate_tf_idf(docs, term)
-        for doc, score in tf_idf_scores.items():
-            relevant_docs[doc] += score  # Суммируем веса для документов
-
-    # Сортируем документы по релевантности
-    sorted_docs = sorted(relevant_docs.items(), key=lambda x: x[1], reverse=True)
-    return sorted_docs
-
-def find_in_dir(query):
-    """
-    Использует вероятностный подход для поиска по файлам.
-    """
-    os.chdir(path)
-    results = probabilistic_search(query)
-    formatted_results = []
-
-    for doc, relevance in results:
-        with open(os.path.join(path, doc), 'r', encoding='utf-8') as file:
-            link = file.readline()
-            title = file.readline()
-            formatted_results.append({
-                "doc": doc,
-                "relevance": relevance,
-                "link": link.strip(),
-                "title": title.strip()
-            })
-
-    return formatted_results
-
-
 

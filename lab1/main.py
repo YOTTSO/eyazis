@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, Cookie
+from fastapi import FastAPI, Form, Cookie, UploadFile, File
 from typing import Optional
 
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -8,21 +8,21 @@ from fastapi.staticfiles import StaticFiles
 
 from urllib.parse import  unquote
 import json
-from lab1.logic_search import find_in_dir,  queries
 import os
 from pathlib import Path
 
+from lab1.logic_search import queries
 from lab1.parser import parse_site
+from probabilistic_search import ProbabilisticSearch
 
 BASE_DIR = Path(__file__).resolve().parent
 
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, '../templates')))
 
 app = FastAPI()
-file_path = os.getcwd() + '/files'
-# Указываем путь к шаблонам
-# Подключаем папку со статическими файлами
+search_system = ProbabilisticSearch(data_dir="./files")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+file_path = "./files"
 
 
 def read_first_lines():
@@ -58,51 +58,9 @@ async def get_text(request: Request):
 
 
 @app.post("/upload", response_class=RedirectResponse, status_code=303)
-async def upload_text(url: str = Form(...)):
-    parse_site(url)
-    return RedirectResponse(url="/", status_code=303)
-
-
-
-@app.get("/logical_search", response_class=HTMLResponse)
-async def logical_search(request: Request, flag: Optional[str] = None, query: Optional[str] = None, result: str = Cookie(None)):
-    if result:
-        data = json.loads(result)
-        result = [[unquote(key), value[0], unquote(value[1])] for key, value in data.items()]
-        response = templates.TemplateResponse(name="search.html",
-                                      request=request,
-                                      context={"result":result,
-                                               "flag":flag,
-                                               "query":query})
-        response.delete_cookie(key="result")
-        return response
-    return templates.TemplateResponse(name="search.html",
-                                      request=request,
-                                      context={"result":result,
-                                               "flag":flag}
-    )
-
-
-@app.post("/logical_search", response_class=RedirectResponse, status_code=303)
-async def logical_search(query: str = Form(...)):
-    try:
-        if query.replace(" ", "") != "":
-            result = find_in_dir(query)
-        else:
-            # Код, который выполняется, если query пустой
-            flag = 'Пожалуйста, введите запрос для поиска.'
-            return RedirectResponse(url=f"/logical_search?flag={flag}", status_code=303)
-    except Exception:
-        flag = 'Неккоректный ввод'
-        return RedirectResponse(url=f"/logical_search?flag={flag}&query={query}", status_code=303)
-    if result:
-        flag = 'Результат запроса:'
-        response = RedirectResponse(url=f"/logical_search?flag={flag}&query={query}", status_code=303)
-        response.set_cookie(key="result", value=json.dumps(result))
-        return response
-    else:
-        flag = 'Ничего не было найдено!'
-        return RedirectResponse(url=f"/logical_search?flag={flag}&query={query}", status_code=303)
+async def upload_file(url: UploadFile):
+    content = await url.read()
+    return {"filename": url.filename, "size": len(content)}
 
 @app.get("/test", response_class=HTMLResponse)
 async def logical_search(request: Request, flag: Optional[str] = None, query: Optional[str] = None, result: str = Cookie(None)):
@@ -183,8 +141,10 @@ def get_metrics():
 
 @app.get("/probabilistic_search", response_class=HTMLResponse)
 async def logical_search(request: Request, flag: Optional[str] = None, query: Optional[str] = None, result: str = Cookie(None)):
+    print(result)
     if result:
         data = json.loads(result)
+        print(data)
         response = templates.TemplateResponse(name="search.html",
                                               request=request,
                                               context={"result": data,
@@ -196,18 +156,31 @@ async def logical_search(request: Request, flag: Optional[str] = None, query: Op
                                       request=request,
                                       context={"result": None, "flag": flag})
 
+
 @app.post("/probabilistic_search", response_class=RedirectResponse, status_code=303)
-async def logical_search(query: str = Form(...)):
+async def probabilistic_search(query: str = Form(...)):
     try:
-        if query.strip():
-            results = find_in_dir(query)
-            flag = 'Результат запроса:'
-            response = RedirectResponse(url=f"/probabilistic_search?flag={flag}&query={query}", status_code=303)
-            response.set_cookie(key="result", value=json.dumps(results))
-            return response
-        else:
+        # Проверка, что запрос не пустой
+        if query.strip() == "":
             flag = 'Пожалуйста, введите запрос для поиска.'
             return RedirectResponse(url=f"/probabilistic_search?flag={flag}", status_code=303)
-    except Exception:
-        flag = 'Некорректный ввод'
+
+        # Выполнение поиска
+        results = search_system.search(query)
+
+        if not results:
+            flag = 'Ничего не найдено!'
+            return RedirectResponse(url=f"/probabilistic_search?flag={flag}", status_code=303)
+
+        # Передаем результаты поиска в шаблон
+        flag = f'Результат запроса с вероятностью:'
+        response = RedirectResponse(url=f"/probabilistic_search?flag={flag}&query={query}", status_code=303)
+        compact_results = [{"file": (result[0].split("\n"))[1], "probability": round(float(result[1]), 4)} for result in results]
+        print(compact_results)
+        response.set_cookie(key="result", value=json.dumps(compact_results))
+        return response
+
+    except Exception as e:
+        # Обработка исключений
+        flag = f'Произошла ошибка: {str(e)}'
         return RedirectResponse(url=f"/probabilistic_search?flag={flag}&query={query}", status_code=303)

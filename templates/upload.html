@@ -2,25 +2,25 @@
 <html lang="ru">
 <head>
     <title>Upload text</title>
-    <link rel="stylesheet" href="/main.css?v=1.1">
-    <link rel="stylesheet" href="/search.css?v=1.1">
+    <link rel="stylesheet" href="../static/main.css?v=1.1">
+    <link rel="stylesheet" href="../static/search.css?v=1.1">
 
-    <link rel="stylesheet" href="/upload.css?v=1.1">
+    <link rel="stylesheet" href="../static/upload.css?v=1.1">
 </head>
 <body>
     <header>
         <nav class="menu">
-            <a href="/static" class="header-button">На главную</a>
+            <a href="/" class="header-button">На главную</a>
             <a href="/upload" class="header-button">Добавление текстов</a>
-            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/probabilistic_search" class="header-button">Вероятностный поиск</a>
             <a href="/metrics" class="header-button">Метрики</a>
         </nav>
     </header>
 <div>
     <h1>Добавление текста</h1>
-    <form class="form-control" method="post">
-        <label for="url">Введите URL</label><br>
-        <input type="text" name="url" id="url" placeholder="URL" class="input-up"><br>
+    <form class="form-control" enctype='multipart/form-data' method="post">
+        <label for="url">Прикрепите файл</label><br>
+        <input type="file" name="url" id="url" placeholder="URL" class="input-up"><br>
         <button type="submit" class="btn-submit">Добавить</button>
     </form>
     {% if url %}

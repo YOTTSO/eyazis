@@ -2,31 +2,23 @@
 <html lang="ru">
 <head>
     <title>Logical search</title>
-    <link rel="stylesheet" href="/main.css?v=1.1">
-    <link rel="stylesheet" href="/search.css?v=1.1">
+    <link rel="stylesheet" href="../static/main.css?v=1.1">
+    <link rel="stylesheet" href="../static/search.css?v=1.1">
 
-    <link rel="stylesheet" href="/upload.css?v=1.1">
+    <link rel="stylesheet" href="../static/upload.css?v=1.1">
 </head>
 <body>
     <header>
         <nav class="menu">
-            <a href="/static" class="header-button">На главную</a>
+            <a href="/" class="header-button">На главную</a>
             <a href="/upload" class="header-button">Добавление текстов</a>
-            <a href="/logical_search" class="header-button">Логический поиск</a>
+            <a href="/probabilistic_search" class="header-button">Вероятностный поиск</a>
             <a href="/metrics" class="header-button">Метрики</a>
         </nav>
     </header>
      <button class="info-button" id="showTextButton" type="button">?</button>
-            <div id="text" class="my-text" style="display: none;">Логические связки: И/ИЛИ<br>
-                Отрицание: НЕ<br>
-                Искомые слова заключаются в "двойные кавычки"<br>
-                Для добавления приоритета поиска используются (скобки)<br>
-                Для поиска одного слова (с отрицанием или без) или 2 слов с 1 связкой (скобки) не нужны<br>
-                Примеры:<br>
-                "Слово"<br>
-                "Слово" ИЛИ "Слово"<br>
-                "Слово" ИЛИ ("Слово" И "Слово")<br>
-                НЕ "Слово"
+            <div id="text" class="my-text" style="display: none;">Правила для поиска:<br>
+                Необходимое слово или строка должны быть размещены в кавычках
             </div>
         <h1>Добавление текста</h1>
 
@@ -34,7 +26,7 @@
 
 
         <form class="form-control" method="post">
-            <label for="input-field">Введите формулу для логического поиска</label>
+            <label for="input-field">Введите строку для вероятностного поиска</label>
                 <div class="input-container">
                     <input type="text" name="query" id="input-field" placeholder="Введите запрос" value="{{query}}" class="input-up"><br>
                     <div id="extra-placeholder" class="extra-placeholder"></div>
@@ -50,8 +42,7 @@
                 <div class="col-md-6 item">
                     <div class="item-in">
                         <div class="separator"></div>
-                        <a class='link' href="{{ item[1] }}">{{item[2]}}</a>
-                        <p class="clickable">{{ item[0] }}</p>
+                        <a class='link' {{ item['file'] }}>{{ item['file'] }} - {{item['probability']}}</a>
                     </div>
                 </div>
             </div>
